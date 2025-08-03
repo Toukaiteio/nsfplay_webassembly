@@ -142,16 +142,11 @@
 </head>
 <body class="min-h-screen font-sans antialiased">
     <div class="container mx-auto px-4 py-8 max-w-4xl">
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold tracking-tight">🎵 NSF 实时流式播放器</h1>
-        </header>
-
         <main>
             <section class="container">
                 <h2 class="text-xl font-semibold mb-4">选择NSF文件</h2>
                 <div class="space-y-4">
-                    <input type="file" id="nsfFile" accept=".nsf,.nsfe" class="file-input" />
-                    <button onclick="loadNSF()" class="btn">加载NSF文件</button>
+                    <input type="file" id="nsfFile" accept=".nsf,.nsfe" class="file-input" onchange="loadNSF()" />
                 </div>
             </section>
 
