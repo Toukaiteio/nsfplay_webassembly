@@ -105,7 +105,7 @@ int load_nsf_data(const uint8_t* data, int size) {
         
         // 设置默认播放时间（如果NSF文件中没有指定）
         if (g_nsf->playtime_unknown) {
-            g_nsf->SetDefaults(120000, 3000, 1); // 120秒播放，3秒淡出，1次循环
+            g_nsf->SetDefaults(300000, 5000, 0); // 默认5分钟播放，5秒淡出，无限循环
         }
         
         // 加载到播放器
@@ -241,6 +241,42 @@ int nsf_to_wav(int track_number, int length_ms, int fade_ms,
         
     } catch (...) {
         return 0;
+    }
+}
+
+/**
+ * 设置NSF播放参数，禁用默认时间限制
+ * @param playtime_ms 播放时间（毫秒），-1表示无限
+ * @param fadetime_ms 淡出时间（毫秒）
+ * @param loop_count 循环次数，0表示无限循环
+ */
+EMSCRIPTEN_KEEPALIVE
+void nsf_set_playback_options(int playtime_ms, int fadetime_ms, int loop_count) {
+    if (!g_nsf) return;
+    
+    try {
+        if (playtime_ms < 0) {
+            // 禁用默认时间限制，使用无限播放
+            g_nsf->SetDefaults(3600000, fadetime_ms, loop_count); // 1小时作为实际上的无限播放
+        } else {
+            g_nsf->SetDefaults(playtime_ms, fadetime_ms, loop_count);
+        }
+    } catch (...) {
+        // 忽略错误
+    }
+}
+
+/**
+ * 禁用NSF的默认播放时间限制，允许无限循环播放
+ */
+EMSCRIPTEN_KEEPALIVE
+void nsf_disable_time_limit() {
+    if (!g_nsf) return;
+    
+    try {
+        g_nsf->SetDefaults(3600000, 3000, 0); // 1小时播放，3秒淡出，无限循环
+    } catch (...) {
+        // 忽略错误
     }
 }
 

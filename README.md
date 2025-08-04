@@ -83,6 +83,12 @@ async function loadNSF() {
     nsfPlayer.ccall('load_nsf_data', 'number', ['number', 'number'], [dataPtr, nsfData.length]);
     nsfPlayer._free(dataPtr);
     
+    // 禁用默认时间限制，允许无限循环播放
+    nsfPlayer.ccall('nsf_disable_time_limit', 'void', [], []);
+    
+    // 或者使用自定义参数：
+    // nsfPlayer.ccall('nsf_set_playback_options', 'void', ['number', 'number', 'number'], [-1, 3000, 0]);
+    
     // 初始化音频并设置播放器选项
     if (await initAudio()) {
         nsfPlayer.ccall('nsf_player_set_options', 'void', ['number', 'number'], [sampleRate, channels]);
@@ -138,11 +144,41 @@ function togglePlay() {
 - `load_nsf_data(dataPtr, size)`: 加载 NSF 文件数据。
 - `get_nsf_info(infoPtr)`: 获取 NSF 文件信息。
 - `nsf_player_set_options(sampleRate, channels)`: **[新增]** 为流式播放设置采样率和声道。
+- `nsf_set_playback_options(playtimeMs, fadeMs, loopCount)`: **[新增]** 设置播放参数，支持禁用默认时间限制。
+- `nsf_disable_time_limit()`: **[新增]** 禁用默认播放时间限制，允许无限循环播放。
 - `nsf_set_track(trackNumber)`: 设置当前播放的轨道。
 - `nsf_render_audio(trackNumber, frameCount, outputPtr)`: **[新增]** 渲染一个音频数据块用于流式播放。
 - `nsf_reset()`: 重置播放器状态。
 - `nsf_to_wav(...)`: 将整个轨道转换为 WAV 数据。
 - `cleanup()`: 清理并释放所有资源。
+
+## 播放时间控制
+
+本项目现在支持灵活控制播放时间，避免默认的120秒限制：
+
+### 禁用时间限制
+使用 `nsf_disable_time_limit()` 函数可以完全禁用默认的播放时间限制，允许NSF文件按照其原始设计进行无限循环播放。
+
+### 自定义播放参数
+使用 `nsf_set_playback_options(playtimeMs, fadeMs, loopCount)` 可以精确控制：
+- `playtimeMs`: 播放时间（毫秒），传入-1表示无限播放
+- `fadeMs`: 淡出时间（毫秒）
+- `loopCount`: 循环次数，0表示无限循环
+
+### 使用示例
+
+```javascript
+// 方法1: 完全禁用时间限制
+nsfPlayer.ccall('nsf_disable_time_limit', 'void', [], []);
+
+// 方法2: 自定义播放参数 - 无限循环
+nsfPlayer.ccall('nsf_set_playback_options', 'void', 
+    ['number', 'number', 'number'], [-1, 3000, 0]);
+
+// 方法3: 自定义播放参数 - 10分钟播放，5秒淡出
+nsfPlayer.ccall('nsf_set_playback_options', 'void', 
+    ['number', 'number', 'number'], [600000, 5000, 1]);
+```
 
 ## 示例
 
@@ -152,6 +188,7 @@ function togglePlay() {
 - 轨道切换和音量控制
 - 实时波形图
 - 播放/暂停/停止控制
+- **无限循环播放支持**
 
 ## 致谢
 
