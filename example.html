@@ -3,191 +3,362 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NSF 实时流式播放器</title>
+    <title>NSF Player - 专业音频播放器</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              border: "hsl(var(--border))",
-              input: "hsl(var(--input))",
-              ring: "hsl(var(--ring))",
-              background: "hsl(var(--background))",
-              foreground: "hsl(var(--foreground))",
-              primary: {
-                DEFAULT: "hsl(var(--primary))",
-                foreground: "hsl(var(--primary-foreground))",
-              },
-              secondary: {
-                DEFAULT: "hsl(var(--secondary))",
-                foreground: "hsl(var(--secondary-foreground))",
-              },
-              destructive: {
-                DEFAULT: "hsl(var(--destructive))",
-                foreground: "hsl(var(--destructive-foreground))",
-              },
-              muted: {
-                DEFAULT: "hsl(var(--muted))",
-                foreground: "hsl(var(--muted-foreground))",
-              },
-              accent: {
-                DEFAULT: "hsl(var(--accent))",
-                foreground: "hsl(var(--accent-foreground))",
-              },
-              popover: {
-                DEFAULT: "hsl(var(--popover))",
-                foreground: "hsl(var(--popover-foreground))",
-              },
-              card: {
-                DEFAULT: "hsl(var(--card))",
-                foreground: "hsl(var(--card-foreground))",
-              },
-            },
-            borderRadius: {
-              lg: "var(--radius)",
-              md: "calc(var(--radius) - 2px)",
-              sm: "calc(var(--radius) - 4px)",
-            },
-          },
-        },
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+      
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
-    </script>
-    <style type="text/tailwindcss">
-      @layer base {
-        :root {
-          --background: 0 0% 100%;
-          --foreground: 222.2 84% 4.9%;
-          --card: 0 0% 100%;
-          --card-foreground: 222.2 84% 4.9%;
-          --popover: 0 0% 100%;
-          --popover-foreground: 222.2 84% 4.9%;
-          --primary: 221.2 83.2% 53.3%;
-          --primary-foreground: 210 40% 98%;
-          --secondary: 210 40% 96%;
-          --secondary-foreground: 222.2 84% 4.9%;
-          --muted: 210 40% 96%;
-          --muted-foreground: 215.4 16.3% 46.9%;
-          --accent: 210 40% 96%;
-          --accent-foreground: 222.2 84% 4.9%;
-          --destructive: 0 84.2% 60.2%;
-          --destructive-foreground: 210 40% 98%;
-          --border: 214.3 31.8% 91.4%;
-          --input: 214.3 31.8% 91.4%;
-          --ring: 221.2 83.2% 53.3%;
-          --radius: 0.5rem;
-        }
+      
+      body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #0f0f23 0%, #1a1a3a 50%, #0f0f23 100%);
+        color: #e2e8f0;
+        min-height: 100vh;
+        overflow-x: hidden;
       }
-      @layer base {
-        * {
-          @apply border-border;
-        }
-        body {
-          @apply bg-background text-foreground;
-          @apply bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white;
-          font-family: system-ui, -apple-system, sans-serif;
-        }
+      
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
       }
-      @layer components {
-        .container {
-          @apply bg-white/10 backdrop-blur-md rounded-xl p-5 my-4 border border-white/20;
-        }
-        .btn {
-          @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
-          @apply bg-primary text-primary-foreground hover:bg-primary/90;
-          @apply h-10 px-4 py-2;
-          @apply shadow-lg hover:shadow-xl hover:-translate-y-0.5;
-        }
-        .btn-play {
-          @apply bg-red-500 hover:bg-red-600 text-lg px-6 py-3;
-        }
-        .btn-stop {
-          @apply bg-orange-500 hover:bg-orange-600;
-        }
-        .file-input {
-          @apply bg-white/10 border-2 border-dashed border-white/30 rounded-lg p-5 text-white w-full my-2.5 cursor-pointer;
-        }
-        .status-info {
-          @apply bg-blue-500/30 border-l-4 border-blue-400;
-        }
-        .status-success {
-          @apply bg-green-500/30 border-l-4 border-green-400;
-        }
-        .status-error {
-          @apply bg-red-500/30 border-l-4 border-red-400;
-        }
-        .status {
-          @apply p-4 my-2.5 rounded-lg backdrop-blur-sm;
-        }
-        .controls {
-          @apply flex items-center gap-4 my-4 flex-wrap;
-        }
-        .volume-control {
-          @apply flex items-center gap-2.5;
-        }
-        .slider {
-          @apply flex-1 h-1.5 rounded-lg bg-white/30 outline-none;
-        }
-        .track-info {
-          @apply bg-black/20 p-4 rounded-lg my-4;
-        }
-        .waveform {
-          @apply w-full h-20 bg-black/30 rounded-lg my-4;
-        }
-        .select {
-          @apply bg-white/10 text-white border border-white/30 rounded-md px-2 py-1.5;
-        }
+      
+      .gradient-border {
+        position: relative;
+        background: linear-gradient(145deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+        border: 1px solid transparent;
+      }
+      
+      .gradient-border::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        padding: 1px;
+        background: linear-gradient(145deg, #6366f1, #a855f7);
+        border-radius: inherit;
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask-composite: exclude;
+      }
+      
+      .floating-element {
+        animation: float 6s ease-in-out infinite;
+      }
+      
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+      }
+      
+      .pulse-glow {
+        animation: pulse-glow 2s ease-in-out infinite alternate;
+      }
+      
+      @keyframes pulse-glow {
+        from { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+        to { box-shadow: 0 0 40px rgba(99, 102, 241, 0.6); }
+      }
+      
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        border: none;
+        outline: none;
+      }
+      
+      .btn-primary {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        padding: 12px 24px;
+      }
+      
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+      }
+      
+      .btn-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.1);
+        color: #e2e8f0;
+        padding: 10px;
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+      }
+      
+      .btn-icon:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.05);
+      }
+      
+      .play-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        font-size: 20px;
+      }
+      
+      .play-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+      }
+      
+      .sidebar {
+        width: 280px;
+        background: rgba(15, 15, 35, 0.8);
+        backdrop-filter: blur(20px);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      
+      .card {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        transition: all 0.3s ease;
+      }
+      
+      .card:hover {
+        background: rgba(255, 255, 255, 0.12);
+        transform: translateY(-2px);
+      }
+      
+      .input-field {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        padding: 10px 14px;
+        color: #e2e8f0;
+        transition: all 0.3s ease;
+      }
+      
+      .input-field:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+      
+      .waveform-container {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+        border-radius: 12px;
+        padding: 16px;
+      }
+      
+      .status-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+      
+      .status-playing { background-color: #10b981; animation: pulse 1.5s infinite; }
+      .status-stopped { background-color: #6b7280; }
+      .status-error { background-color: #ef4444; }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+      
+      .file-drop-zone {
+        border: 2px dashed rgba(99, 102, 241, 0.3);
+        border-radius: 16px;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+      }
+      
+      .file-drop-zone:hover {
+        border-color: #6366f1;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
       }
     </style>
 </head>
-<body class="min-h-screen font-sans antialiased">
-    <div class="container mx-auto px-4 py-8 max-w-4xl">
-        <main>
-            <section class="container">
-                <h2 class="text-xl font-semibold mb-4">选择NSF文件</h2>
-                <div class="space-y-4">
-                    <input type="file" id="nsfFile" accept=".nsf,.nsfe" class="file-input" onchange="loadNSF()" />
-                </div>
-            </section>
-
-            <section id="infoContainer" class="container hidden">
-                <h2 class="text-xl font-semibold mb-4">文件信息</h2>
-                <div id="nsfInfo" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"></div>
-                
-                <div class="controls flex-col md:flex-row gap-6">
-                    <div class="flex items-center space-x-2">
-                        <label for="trackSelect" class="text-sm font-medium">轨道:</label>
-                        <select id="trackSelect" class="select w-full"></select>
+<body class="overflow-hidden">
+    <!-- 主容器 -->
+    <div class="flex h-screen">
+        <!-- 侧边栏 -->
+        <aside class="sidebar flex flex-col">
+            <div class="p-6 border-b border-white/10">
+                <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                    NSF Player
+                </h1>
+                <p class="text-sm text-gray-400 mt-1">专业音频播放器</p>
+            </div>
+            
+            <!-- 文件上传区域 -->
+            <div class="p-6 flex-1">
+                <div class="file-drop-zone p-6 text-center cursor-pointer mb-6" onclick="document.getElementById('nsfFile').click()">
+                    <input type="file" id="nsfFile" accept=".nsf,.nsfe" class="hidden" onchange="loadNSF()">
+                    <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
                     </div>
-                    <div class="volume-control w-full md:w-auto">
-                        <label for="volumeSlider" class="text-sm font-medium">音量:</label>
-                        <input type="range" id="volumeSlider" min="0" max="100" value="70" class="slider">
-                        <span id="volumeValue" class="text-sm font-medium w-12 text-right">70%</span>
+                    <h3 class="font-medium text-gray-200 mb-1">选择文件</h3>
+                    <p class="text-sm text-gray-400">支持 NSF, NSFE 格式</p>
+                </div>
+
+                <!-- 轨道选择 -->
+                <div id="trackSelector" class="hidden mb-6">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">轨道选择</label>
+                    <select id="trackSelect" class="w-full input-field">
+                    </select>
+                </div>
+
+                <!-- 音量控制 -->
+                <div id="volumeControl" class="hidden mb-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-sm font-medium text-gray-300">音量</label>
+                        <span id="volumeValue" class="text-sm text-gray-400">70%</span>
+                    </div>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="70" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider">
+                </div>
+
+                <!-- 状态指示器 -->
+                <div id="statusPanel" class="hidden p-4 rounded-lg bg-black/20">
+                    <div class="flex items-center mb-2">
+                        <div id="statusIndicator" class="status-indicator status-stopped"></div>
+                        <span id="playStatus" class="text-sm font-medium">准备就绪</span>
+                    </div>
+                    <div class="text-xs text-gray-400 space-y-1">
+                        <div>轨道: <span id="currentTrack" class="text-gray-300">-</span></div>
+                        <div>时间: <span id="playTime" class="text-gray-300 font-mono">00:00</span></div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </aside>
 
-            <section id="playerContainer" class="container hidden">
-                <h2 class="text-xl font-semibold mb-4">实时播放控制</h2>
-                <div class="controls">
-                    <button id="playBtn" onclick="togglePlay()" class="btn btn-play">▶️ 播放</button>
-                    <button onclick="stopPlay()" class="btn btn-stop">⏹️ 停止</button>
-                    <button onclick="prevTrack()" class="btn">⏮️ 上一首</button>
-                    <button onclick="nextTrack()" class="btn">⏭️ 下一首</button>
+        <!-- 主内容区域 -->
+        <main class="flex-1 overflow-hidden">
+            <!-- 顶部状态栏 -->
+            <header class="glass-effect px-6 py-4 border-b border-white/10">
+                <div id="status" class="flex items-center text-sm">
+                    <div class="w-2 h-2 bg-blue-400 rounded-full mr-2 animate-pulse"></div>
+                    <span>准备就绪，请选择NSF文件开始播放</span>
                 </div>
-                
-                <canvas id="waveform" class="waveform"></canvas>
-                
-                <div class="track-info grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div><strong>状态:</strong> <span id="playStatus" class="font-mono">已停止</span></div>
-                    <div><strong>当前轨道:</strong> <span id="currentTrack" class="font-mono">-</span></div>
-                    <div><strong>播放时间:</strong> <span id="playTime" class="font-mono">00:00</span></div>
-                    <div><strong>缓冲状态:</strong> <span id="bufferStatus" class="font-mono">-</span></div>
+            </header>
+
+            <!-- 内容区域 -->
+            <div class="p-6 h-full overflow-y-auto">
+                <div id="welcomeScreen" class="flex items-center justify-center h-full">
+                    <div class="text-center">
+                        <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center floating-element">
+                            <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-200 mb-2">开始音频之旅</h2>
+                        <p class="text-gray-400">选择一个NSF文件来体验高质量的复古游戏音乐</p>
+                    </div>
                 </div>
-            </section>
+
+                <!-- 主要功能区域 -->
+                <div id="mainContent" class="hidden space-y-6">
+                    <!-- 文件信息卡片 -->
+                    <div class="card p-6">
+                        <h2 class="text-lg font-semibold mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            文件信息
+                        </h2>
+                        <div id="nsfInfo" class="grid grid-cols-1 lg:grid-cols-3 gap-4"></div>
+                    </div>
+
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <!-- 播放控制器 -->
+                        <div class="card p-6">
+                            <h2 class="text-lg font-semibold mb-6 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293H15M9 10v4a2 2 0 002 2h2a2 2 0 002-2v-4M9 10V9a2 2 0 012-2h2a2 2 0 012 2v1.01"></path>
+                                </svg>
+                                实时播放
+                            </h2>
+                            
+                            <!-- 播放控制按钮 -->
+                            <div class="flex items-center justify-center space-x-4 mb-6">
+                                <button onclick="prevTrack()" class="btn-icon">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                                    </svg>
+                                </button>
+                                <button id="playBtn" onclick="togglePlay()" class="play-button pulse-glow">
+                                    <svg id="playIcon" class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M8 5v14l11-7z"/>
+                                    </svg>
+                                </button>
+                                <button onclick="stopPlay()" class="btn-icon">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M6 6h12v12H6z"/>
+                                    </svg>
+                                </button>
+                                <button onclick="nextTrack()" class="btn-icon">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- 波形显示 -->
+                            <div class="waveform-container">
+                                <canvas id="waveform" class="w-full h-20 rounded-lg"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- WAV转换器 -->
+                        <div class="card p-6">
+                            <h2 class="text-lg font-semibold mb-6 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                </svg>
+                                WAV 转换
+                            </h2>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">转换轨道</label>
+                                    <select id="wavTrackSelect" class="w-full input-field"></select>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">时长 (ms)</label>
+                                        <input type="number" id="wavLength" value="120000" class="w-full input-field">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">淡出 (ms)</label>
+                                        <input type="number" id="wavFade" value="5000" class="w-full input-field">
+                                    </div>
+                                </div>
+                                <button onclick="convertToWav()" class="btn-primary w-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    生成 WAV 文件
+                                </button>
+                                <div id="wavStatus" class="text-sm"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
-
-        <footer id="statusContainer" class="mt-8"></footer>
     </div>
 
     <script>
@@ -206,11 +377,47 @@
 
         // 显示状态
         function showStatus(message, type = 'info') {
-            const container = document.getElementById('statusContainer');
-            let statusClass = 'status-info';
-            if (type === 'success') statusClass = 'status-success';
-            if (type === 'error') statusClass = 'status-error';
-            container.innerHTML = `<div class="status ${statusClass}">${message}</div>`;
+            const statusElement = document.getElementById('status');
+            const indicator = statusElement.querySelector('div');
+            
+            // 更新指示器颜色
+            indicator.className = 'w-2 h-2 rounded-full mr-2';
+            if (type === 'success') {
+                indicator.className += ' bg-green-400 animate-pulse';
+            } else if (type === 'error') {
+                indicator.className += ' bg-red-400 animate-pulse';
+            } else {
+                indicator.className += ' bg-blue-400 animate-pulse';
+            }
+            
+            // 更新文本
+            statusElement.querySelector('span').textContent = message;
+        }
+
+        // 更新状态指示器
+        function updateStatusIndicator(status) {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('playStatus');
+            
+            indicator.className = 'status-indicator';
+            
+            switch(status) {
+                case 'playing':
+                    indicator.className += ' status-playing';
+                    statusText.textContent = '播放中';
+                    break;
+                case 'stopped':
+                    indicator.className += ' status-stopped';
+                    statusText.textContent = '已停止';
+                    break;
+                case 'error':
+                    indicator.className += ' status-error';
+                    statusText.textContent = '错误';
+                    break;
+                default:
+                    indicator.className += ' status-stopped';
+                    statusText.textContent = '准备就绪';
+            }
         }
 
         // 初始化WebAssembly
@@ -357,18 +564,46 @@
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
             
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // 清除画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            ctx.strokeStyle = '#4CAF50';
+            // 绘制波形背景网格
+            ctx.strokeStyle = 'rgba(99, 102, 241, 0.1)';
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            
+            // 水平网格线
+            for (let i = 0; i <= 4; i++) {
+                const y = (canvas.height / 4) * i;
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+            }
+            
+            // 垂直网格线
+            for (let i = 0; i <= 10; i++) {
+                const x = (canvas.width / 10) * i;
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+            }
+            ctx.stroke();
+            
+            // 绘制波形
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            gradient.addColorStop(0, '#10b981');
+            gradient.addColorStop(0.5, '#3b82f6');
+            gradient.addColorStop(1, '#8b5cf6');
+            
+            ctx.strokeStyle = gradient;
             ctx.lineWidth = 2;
+            ctx.shadowColor = '#10b981';
+            ctx.shadowBlur = 4;
             ctx.beginPath();
             
             const sliceWidth = canvas.width / audioData.length;
             let x = 0;
             
             for (let i = 0; i < audioData.length; i++) {
-                const v = audioData[i] * 0.5;
+                const v = audioData[i] * 0.4; // 略微减小振幅
                 const y = (v + 1) * canvas.height / 2;
                 
                 if (i === 0) {
@@ -381,6 +616,7 @@
             }
             
             ctx.stroke();
+            ctx.shadowBlur = 0; // 重置阴影
         }
 
         // 加载NSF文件
@@ -437,14 +673,15 @@
 
                     displayNSFInfo();
                     setupTrackSelector();
+                    setupWavExporter();
                     
                     // 初始化音频系统
                     if (await initAudio()) {
                         // 设置C++播放器参数
                         nsfPlayer.ccall('nsf_player_set_options', 'void', ['number', 'number'], [sampleRate, channels]);
                         
-                        document.getElementById('playerContainer').classList.remove('hidden');
-                        showStatus('NSF文件加载成功！可以开始实时播放了。', 'success');
+                        document.getElementById('mainContent').classList.remove('hidden');
+                        showStatus('NSF文件加载成功！可以开始实时播放或转换为WAV。', 'success');
                     }
                 } else {
                     throw new Error('获取NSF信息失败');
@@ -462,30 +699,57 @@
         function displayNSFInfo() {
             const infoDiv = document.getElementById('nsfInfo');
             infoDiv.innerHTML = `
-                <div class="bg-black/20 p-3 rounded-lg"><strong>标题:</strong> ${nsfInfo.title || '未知'}</div>
-                <div class="bg-black/20 p-3 rounded-lg"><strong>艺术家:</strong> ${nsfInfo.artist || '未知'}</div>
-                <div class="bg-black/20 p-3 rounded-lg"><strong>版权:</strong> ${nsfInfo.copyright || '未知'}</div>
-                <div class="bg-black/20 p-3 rounded-lg"><strong>轨道数:</strong> ${nsfInfo.totalSongs}</div>
-                <div class="bg-black/20 p-3 rounded-lg"><strong>默认轨道:</strong> ${nsfInfo.defaultSong + 1}</div>
+                <div class="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 p-4 rounded-lg border border-indigo-500/20">
+                    <div class="text-xs text-indigo-300 mb-1">标题</div>
+                    <div class="font-medium text-white">${nsfInfo.title || '未知'}</div>
+                </div>
+                <div class="bg-gradient-to-br from-green-500/10 to-blue-500/10 p-4 rounded-lg border border-green-500/20">
+                    <div class="text-xs text-green-300 mb-1">艺术家</div>
+                    <div class="font-medium text-white">${nsfInfo.artist || '未知'}</div>
+                </div>
+                <div class="bg-gradient-to-br from-purple-500/10 to-pink-500/10 p-4 rounded-lg border border-purple-500/20">
+                    <div class="text-xs text-purple-300 mb-1">版权</div>
+                    <div class="font-medium text-white text-sm">${nsfInfo.copyright || '未知'}</div>
+                </div>
+                <div class="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 p-4 rounded-lg border border-yellow-500/20">
+                    <div class="text-xs text-yellow-300 mb-1">轨道数</div>
+                    <div class="font-medium text-white">${nsfInfo.totalSongs} 首</div>
+                </div>
+                <div class="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 p-4 rounded-lg border border-cyan-500/20">
+                    <div class="text-xs text-cyan-300 mb-1">默认轨道</div>
+                    <div class="font-medium text-white">第 ${nsfInfo.defaultSong + 1} 首</div>
+                </div>
             `;
-            document.getElementById('infoContainer').classList.remove('hidden');
+            
+            // 显示主内容区域，隐藏欢迎界面
+            document.getElementById('mainContent').classList.remove('hidden');
+            document.getElementById('welcomeScreen').classList.add('hidden');
+            document.getElementById('trackSelector').classList.remove('hidden');
+            document.getElementById('volumeControl').classList.remove('hidden');
+            document.getElementById('statusPanel').classList.remove('hidden');
         }
 
         // 设置轨道选择器
         function setupTrackSelector() {
             const trackSelect = document.getElementById('trackSelect');
+            const wavTrackSelect = document.getElementById('wavTrackSelect');
             trackSelect.innerHTML = '';
+            wavTrackSelect.innerHTML = '';
             
             for (let i = 1; i <= nsfInfo.totalSongs; i++) {
                 const option = document.createElement('option');
                 option.value = i;
                 option.textContent = `轨道 ${i}`;
-                option.className = 'bg-gray-800 text-white';
+                
+                const wavOption = option.cloneNode(true);
+
                 if (i === nsfInfo.defaultSong + 1) {
                     option.selected = true;
+                    wavOption.selected = true;
                     currentTrack = i;
                 }
                 trackSelect.appendChild(option);
+                wavTrackSelect.appendChild(wavOption);
             }
             
             trackSelect.addEventListener('change', (e) => {
@@ -500,6 +764,73 @@
                     updateCurrentTrackDisplay();
                 }
             });
+        }
+        
+        function setupWavExporter() {
+            const wavLengthInput = document.getElementById('wavLength');
+            const wavFadeInput = document.getElementById('wavFade');
+            
+            if (nsfInfo.lengthMs > 0) {
+                wavLengthInput.value = nsfInfo.lengthMs;
+            }
+            if (nsfInfo.fadeMs > 0) {
+                wavFadeInput.value = nsfInfo.fadeMs;
+            }
+        }
+
+        async function convertToWav() {
+            if (!nsfPlayer || !nsfInfo) {
+                showStatus('请先加载一个NSF文件。', 'error');
+                return;
+            }
+
+            const wavStatus = document.getElementById('wavStatus');
+            wavStatus.innerHTML = '<span class="text-yellow-400">正在转换，请稍候...</span>';
+
+            try {
+                const track = parseInt(document.getElementById('wavTrackSelect').value);
+                const lengthMs = parseInt(document.getElementById('wavLength').value);
+                const fadeMs = parseInt(document.getElementById('wavFade').value);
+                const wavSampleRate = 44100;
+                const wavChannels = 2;
+
+                // 估算最大可能的WAV大小并分配内存
+                const maxDurationMs = lengthMs + fadeMs;
+                const maxDataSize = (maxDurationMs / 1000) * wavSampleRate * wavChannels * 2;
+                const headerSize = 44;
+                const bufferSize = headerSize + maxDataSize;
+                const wavPtr = nsfPlayer._malloc(bufferSize);
+
+                if (!wavPtr) {
+                    throw new Error('无法为WAV文件分配内存。');
+                }
+                
+                // 调用C++函数
+                const wavSize = nsfPlayer.ccall('nsf_to_wav', 'number',
+                    ['number', 'number', 'number', 'number', 'number', 'number', 'number'],
+                    [track, lengthMs, fadeMs, wavSampleRate, wavChannels, wavPtr, bufferSize]
+                );
+
+                if (wavSize > 0) {
+                    const wavData = new Uint8Array(nsfPlayer.HEAPU8.buffer, wavPtr, wavSize);
+                    const blob = new Blob([wavData], { type: 'audio/wav' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    const fileName = `track_${track}.wav`;
+                    wavStatus.innerHTML = `
+                        <span class="text-green-400">转换成功!</span>
+                        <a href="${url}" download="${fileName}" class="btn ml-4">下载WAV文件</a>
+                    `;
+                } else {
+                    throw new Error('WAV转换失败，C++函数返回0。');
+                }
+
+                nsfPlayer._free(wavPtr);
+
+            } catch (error) {
+                wavStatus.innerHTML = `<span class="text-red-400">转换错误: ${error.message}</span>`;
+                console.error('WAV conversion error:', error);
+            }
         }
 
         // 切换播放状态
@@ -528,11 +859,15 @@
             nsfPlayer.ccall('nsf_set_track', 'void', ['number'], [currentTrack - 1]);
             nsfPlayer.ccall('nsf_reset', 'void', [], []);
             
-            // 更新UI
-            document.getElementById('playBtn').textContent = '⏸️ 暂停';
-            document.getElementById('playStatus').textContent = '播放中';
-            document.getElementById('currentTrack').textContent = `轨道 ${currentTrack}`;
-            document.getElementById('bufferStatus').textContent = '实时生成';
+            // 更新播放按钮图标为暂停
+            const playIcon = document.getElementById('playIcon');
+            playIcon.innerHTML = `
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            `;
+            
+            // 更新状态
+            updateStatusIndicator('playing');
+            updateCurrentTrackDisplay();
             
             // 开始播放时间更新
             startPlayTimer();
@@ -544,11 +879,15 @@
         function stopPlay() {
             isPlaying = false;
             
-            // 更新UI
-            document.getElementById('playBtn').textContent = '▶️ 播放';
-            document.getElementById('playStatus').textContent = '已停止';
+            // 更新播放按钮图标为播放
+            const playIcon = document.getElementById('playIcon');
+            playIcon.innerHTML = `
+                <path d="M8 5v14l11-7z"/>
+            `;
+            
+            // 更新状态
+            updateStatusIndicator('stopped');
             document.getElementById('playTime').textContent = '00:00';
-            document.getElementById('bufferStatus').textContent = '-';
             
             stopPlayTimer();
             showStatus('播放已停止', 'info');
