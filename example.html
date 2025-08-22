@@ -455,6 +455,8 @@
 
         // 初始化Web Audio API
         async function initAudio() {
+            if (audioContext) return true; // 如果已存在，则不重新创建
+
             try {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)({
                     sampleRate: sampleRate
@@ -630,6 +632,23 @@
             }
 
             showStatus('正在初始化...', 'info');
+
+            // 如果已有音频在播放，先停止并清理
+            if (audioContext) {
+                stopPlay();
+                await audioContext.close();
+                audioContext = null;
+                scriptProcessor = null;
+                console.log('旧的AudioContext已清理');
+            }
+            
+            // 重置UI状态
+            document.getElementById('mainContent').classList.add('hidden');
+            document.getElementById('welcomeScreen').classList.remove('hidden');
+            updateStatusIndicator('stopped');
+            document.getElementById('playTime').textContent = '00:00';
+
+
             if (!(await initWasm())) return;
 
             showStatus('正在加载NSF文件...', 'info');
